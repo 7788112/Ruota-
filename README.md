@@ -1,101 +1,102 @@
 # Routa della Fortuna
 
-NSFW tag 随机老虎机。7 个维度，400+ tags，来源于 AO3、哔咔、DLsite 等主流网站。
+Pick your wheels. Pull the lever. No refunds.
 
-## 两种用法
+选好轮子，拉下拉杆，概不退换。
 
-### 直接玩（无需安装）
+---
 
-打开 [`index.html`](index.html) 即可。可以部署到 GitHub Pages 或任何静态托管。
+An NSFW tag randomizer styled as a luxury vintage slot machine. 7 dimensions, 450+ tags (zh/en/ja), sourced from AO3, Pixiv, DLsite & more. Use it in your browser, self-host it, or let your AI spin for you.
 
-自定义标签保存在浏览器 localStorage 中。
+一台 NSFW 标签随机老虎机。7 个维度，450+ 标签（中/英/日三语），来源于 AO3、哔咔、DLsite 等主流网站。可以直接在浏览器里玩，也可以自部署接入 AI。
 
-### 部署版（AI 集成）
+## Quick Start / 快速开始
+
+Open [`index.html`](index.html) in your browser. Done.
+
+浏览器打开 [`index.html`](index.html)，完事。
+
+Deploy to GitHub Pages for a shareable link. Custom tags save to localStorage.
+
+部署到 GitHub Pages 就能分享链接。自定义标签保存在浏览器 localStorage 里。
+
+## Self-Host / 自部署（AI 集成）
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ero-slot.git
-cd ero-slot
+git clone https://github.com/YOUR_USERNAME/routa-della-fortuna.git
+cd routa-della-fortuna
 npm install
 npm start
 ```
 
-打开 `http://localhost:3000`。
+Open `http://localhost:3000`. Hit **Send to AI** in the result card to forward results via webhook.
 
-#### API
+打开 `http://localhost:3000`。结果卡片里点 **Send to AI** 可以把结果转发给你的 AI。
 
-| 端点 | 方法 | 说明 |
-|------|------|------|
-| `/api/dimensions` | GET | 获取所有维度和标签 |
-| `/api/spin` | POST | 随机 spin，返回结果 |
-| `/api/tags` | POST | 添加自定义标签（持久化） |
-| `/api/report` | POST | 前端 spin 结果上报 |
+Set `CALLBACK_URL` to receive spin results:
 
-**Spin 示例：**
+设置 `CALLBACK_URL` 接收 spin 结果：
 
 ```bash
+CALLBACK_URL=https://your-ai-webhook.com/receive npm start
+```
+
+## API
+
+```bash
+# Spin
 curl -X POST http://localhost:3000/api/spin \
   -H "Content-Type: application/json" \
   -d '{"active":["position","scenario","props","roleplay","physical","mental"],"gore":false}'
-```
 
-**添加标签：**
-
-```bash
+# Add a custom tag (only zh is required)
 curl -X POST http://localhost:3000/api/tags \
   -H "Content-Type: application/json" \
-  -d '{"dimension":"position","zh":"新标签","en":"optional","ja":"optional"}'
+  -d '{"dimension":"position","zh":"新标签"}'
+
+# List all dimensions & tags
+curl http://localhost:3000/api/dimensions
 ```
 
-#### AI 工具（MCP）
+## MCP (AI Tool)
 
-`mcp-server.js` 是一个 MCP stdio server，可以让 AI 直接调用 spin。
+`mcp-server.js` is a stdio MCP server. Add it to your AI's config:
 
-配置示例（`.mcp.json`）：
+`mcp-server.js` 是 MCP stdio 工具服务器，加到你的 AI 配置里：
 
 ```json
 {
   "mcpServers": {
     "ero_slot": {
       "command": "node",
-      "args": ["/path/to/ero-slot/mcp-server.js"]
+      "args": ["/path/to/routa-della-fortuna/mcp-server.js"]
     }
   }
 }
 ```
 
-AI 可用工具：
-- `ero_slot_spin` — 随机 spin，返回今晚的 recipe
-- `ero_slot_dimensions` — 列出所有维度和标签数
+Tools / 可用工具：
+- `ero_slot_spin` — spin the machine, get tonight's recipe / 摇老虎机
+- `ero_slot_dimensions` — list all dimensions and tag counts / 列出维度和标签数
 
-#### Webhook 回调
+## Dimensions / 七个维度
 
-设置 `CALLBACK_URL` 环境变量，spin 结果会自动 POST 到指定 URL：
-
-```bash
-CALLBACK_URL=https://your-webhook.com/receive npm start
-```
-
-## 七个维度
-
-| # | 维度 | 说明 |
-|---|------|------|
-| 1 | 体位 · Entry | 身体的排列方式或者进入哪个入口 |
-| 2 | 场景 · Scene | 在哪里，什么时间，谁可能推门进来 |
-| 3 | 道具 · Props | 手边能拿到的东西。从专业的到即兴的 |
-| 4 | 设定 · Role | 什么人，什么关系，什么故事 |
-| 5 | 物理 · Body | 节奏、力度、什么时候允许高潮 |
-| 6 | 精神 · Mind | 羞辱、夸奖、控制、服从 |
-| 7 | GORE | ⚠ 极端虚构内容，默认锁定 |
-
-## 自定义标签
-
-每个标签包含三个字段：
-- **中文**（必填）— 转轮上显示的文字
-- **English**（选填）— MENU 卡片补充
-- **日本語**（选填）— MENU 卡片补充
-
-部署版的自定义标签持久化到 `src/tags.json`。静态版保存在浏览器 localStorage。
+| Wheel | What it decides |
+|-------|----------------|
+| 体位 ENTRY | How bodies arrange / 身体的排列方式或者进入哪个入口 |
+| 场景 SCENE | Where, when, who might walk in / 在哪里，什么时间，谁可能推门进来 |
+| 道具 PROPS | What's in your hands / 手边能拿到的东西，从冰块到绳子 |
+| 设定 ROLE | Who you are to each other / 什么人，什么关系，什么故事 |
+| 物理 BODY | What happens to the body / 节奏、力度、什么时候允许高潮 |
+| 精神 MIND | What happens to the mind / 羞辱、夸奖、控制、服从 |
+| ⚠ GORE | Past the point of no return / 仅限虚构场景，默认锁定 |
 
 ## License
 
 MIT
+
+## Credits
+
+**Copper** — concept, design, tag curation, frontend
+
+**Monday** — tag taxonomy, classification system, naming
