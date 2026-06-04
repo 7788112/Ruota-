@@ -256,7 +256,13 @@ body.gore .omikuji{ background:radial-gradient(120% 60% at 50% 0%, rgba(224,32,4
 .omi-again{ background:transparent; color:var(--gold-1); border:1px solid var(--gold-2)!important;
   text-shadow:0 0 6px var(--accent); box-shadow:0 0 10px var(--accent), inset 0 0 8px rgba(231,196,99,.22); }
 body.gore .omi-again{ color:#ffd8d4; }
+.omi-send{ background:linear-gradient(180deg,var(--gold-2),var(--gold-4)); color:#2a1f08; font-weight:700; }
+body.gore .omi-send{ color:#2a0606; }
 .omi-close{ background:transparent; border:1px solid var(--gold-line)!important; color:var(--gold-2); }
+.send-ok{ position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:300;
+  font-family:var(--f-deco); font-size:14px; letter-spacing:3px; color:var(--gold-1);
+  text-shadow:0 0 12px var(--accent); opacity:0; transition:opacity .3s; pointer-events:none; }
+.send-ok.show{ opacity:1; }
 
 @media (max-width:360px){ .title{ font-size:20px; } .cell{ font-size:12px; } }
 
@@ -426,11 +432,14 @@ body.gore .omi-again{ color:#ffd8d4; }
         <ul class="omi-list" id="omiList"></ul>
         <div class="omi-actions">
           <button class="omi-again" id="omiAgain">Spin Again</button>
+          <button class="omi-send" id="omiSend">Send to AI</button>
           <button class="omi-close" id="omiClose">Close</button>
         </div>
       </div>
     </div>
   </div>
+
+  <div class="send-ok" id="sendOk">Sent to AI ✓</div>
 
 <script>
 (function () {
@@ -661,6 +670,7 @@ body.gore .omi-again{ color:#ffd8d4; }
       goreWarnVeil.addEventListener("click", (e) => { if (e.target === goreWarnVeil) goreWarnVeil.classList.remove("show"); });
       this.wireAddTag();
       document.getElementById("omiAgain").addEventListener("click", () => { this.hideResult(); this.spinAll(); });
+      document.getElementById("omiSend").addEventListener("click", () => this.sendToAI());
       document.getElementById("omiClose").addEventListener("click", () => this.hideResult());
       document.getElementById("resultVeil").addEventListener("click", (e) => { if (e.target.id === "resultVeil") this.hideResult(); });
     },
@@ -741,9 +751,10 @@ body.gore .omi-again{ color:#ffd8d4; }
         list.appendChild(li);
       });
       document.getElementById("resultVeil").classList.add("show");
-      this.reportResult(live);
     },
-    reportResult(live) {
+    sendToAI() {
+      const live = this.activeReels().filter(r => r.result);
+      if (!live.length) return;
       const results = live.map(r => ({
         dimension: r.dim.id,
         short: r.dim.short || r.dim.en,
@@ -753,7 +764,16 @@ body.gore .omi-again{ color:#ffd8d4; }
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ results })
-      }).catch(() => {});
+      }).then(r => r.json()).then(j => {
+        if (j.ok) {
+          this.hideResult();
+          const ok = document.getElementById("sendOk");
+          ok.classList.add("show"); buzz([20, 40, 20]);
+          setTimeout(() => ok.classList.remove("show"), 2000);
+        } else {
+          this.flashHint("No CALLBACK_URL configured");
+        }
+      }).catch(() => this.flashHint("Send failed — is the server running?"));
     },
     hideResult() { document.getElementById("resultVeil").classList.remove("show"); },
 
