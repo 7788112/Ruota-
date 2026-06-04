@@ -1,0 +1,20 @@
+{
+  "name": "ero-slot",
+  "version": "1.0.0",
+  "description": "Routa della Fortuna — NSFW tag randomizer slot machine. 7 dimensions, 400+ tags, AI-ready.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "nsfw",
+    "slot-machine",
+    "tag-randomizer",
+    "mcp"
+  ],
+  "author": "C&M",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
