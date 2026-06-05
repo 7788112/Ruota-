@@ -571,8 +571,10 @@ body.gore .omi-again{ color:#ffd8d4; }
     setActive(v) { if (this.locked) return; this.active = v; this.el.classList.remove("settled"); this.refresh(); }
     spin(delay, onStop) {
       if (!this.active || this.locked || this.spinning) { onStop && onStop(); return; }
+      if (this.raf) { cancelAnimationFrame(this.raf); this.raf = null; }
       const total = this.tags.length * ROW_H;
-      this.d = this.baseCopy * total + (this.d % total);
+      const stripMax = (this.copies - 2) * total;
+      this.d = this.baseCopy * total + ((this.d % total) + total) % total;
       this.render();
       this.spinning = true; this.el.classList.add("spinning"); this.el.classList.remove("settled"); this.result = null;
       const SPEED = 2200; let last = performance.now();
@@ -600,6 +602,8 @@ body.gore .omi-again{ color:#ffd8d4; }
         const curCopy = Math.floor(this.d / total);
         let dest = (curCopy + 3) * total + (target - VISIBLE_CENTER) * ROW_H;
         while (dest < this.d + total) dest += total;
+        if (dest > stripMax) dest -= Math.floor((dest - stripMax) / total + 1) * total;
+        if (dest < this.d) dest = this.baseCopy * total + target * ROW_H;
         from = this.d; to = dest; dur = 620; t0 = performance.now(); stopping = true;
       }, delay);
     }
