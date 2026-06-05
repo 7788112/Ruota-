@@ -821,7 +821,7 @@ body.gore .omi-again{ color:#ffd8d4; }
     deleteTag(reel, tag) {
       const idx = reel.tags.indexOf(tag);
       if (idx < 0) return;
-      if (!confirm("删除「" + tag.zh + "」？\nDelete "" + (tag.en || tag.zh) + ""?")) return;
+      if (!confirm("删除「" + tag.zh + "」？\nDelete \"" + (tag.en || tag.zh) + "\"?")) return;
       reel.tags.splice(idx, 1);
       if (!reel.tags.length) { this.flashHint("至少保留一个 tag"); reel.tags.splice(idx, 0, tag); return; }
       reel.copies = calcCopies(reel.tags.length);
