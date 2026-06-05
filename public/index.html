@@ -821,8 +821,8 @@ body.gore .omi-send{ color:#2a0606; }
       }
 
       input.addEventListener("input", () => { clearTimeout(debounce); debounce = setTimeout(doSearch, 180); });
-      input.addEventListener("blur", () => { setTimeout(() => { results.classList.remove("open"); }, 200); });
       input.addEventListener("focus", () => { if (input.value.trim()) doSearch(); });
+      document.addEventListener("pointerdown", (e) => { if (!e.target.closest(".search-wrap")) results.classList.remove("open"); });
     },
 
     deleteTag(reel, tag) {
