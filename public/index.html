@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Routa della Fortuna</title>
+<title>Ruota della Fortuna</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rye&family=Cinzel:wght@500;600;700&family=Noto+Serif+SC:wght@500;600;700&display=swap" rel="stylesheet">
@@ -292,6 +292,43 @@ body.gore .omi-send{ color:#2a0606; }
 .help-card .gore-warn{ color:#e0202c; }
 .help-card .note{ font-size:11px; color:var(--ink-ghost); margin-top:10px; line-height:1.5; }
 
+/* ===================== tag search ===================== */
+.search-wrap{ position:relative; }
+.search-input{ width:100%; padding:10px 14px; border-radius:10px;
+  background:var(--bg-0); border:1px solid var(--gold-line); color:var(--ink);
+  font-family:var(--f-cn); font-size:14px; outline:none; }
+.search-input::placeholder{ color:var(--ink-ghost); }
+.search-input:focus{ border-color:var(--gold-2); box-shadow:0 0 8px rgba(231,196,99,.3); }
+.search-results{ position:absolute; left:0; right:0; top:100%; z-index:60; max-height:280px; overflow-y:auto;
+  background:var(--bg-0); border:1px solid var(--gold-line); border-top:none; border-radius:0 0 10px 10px;
+  display:none; -webkit-overflow-scrolling:touch; }
+.search-results.open{ display:block; }
+.search-item{ padding:8px 14px; border-bottom:1px solid rgba(201,161,74,.15); cursor:default; }
+.search-item:last-child{ border-bottom:none; }
+.search-item .s-tag{ font-family:var(--f-cn); font-size:13px; font-weight:600; color:var(--ink); }
+.search-item .s-dim{ font-family:var(--f-deco); font-size:9px; letter-spacing:1px; color:var(--ink-ghost); margin-left:8px; text-transform:uppercase; }
+.search-item .s-sub{ display:block; font-family:var(--f-deco); font-size:10px; color:var(--ink-dim); margin-top:2px; }
+.search-empty{ padding:12px 14px; font-size:12px; color:var(--ink-ghost); text-align:center; }
+
+/* ===================== history ===================== */
+.history-toggle{ width:100%; padding:10px; border-radius:10px; cursor:pointer;
+  background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.3)); border:1px solid var(--gold-line); color:var(--gold-2);
+  font-family:var(--f-deco); font-size:11px; letter-spacing:3px; text-transform:uppercase;
+  display:flex; align-items:center; justify-content:center; gap:8px; }
+.history-toggle .cn{ font-family:var(--f-cn); letter-spacing:2px; }
+.history-panel{ overflow:hidden; max-height:0; transition:max-height .4s ease; }
+.history-panel.open{ max-height:400px; }
+.history-inner{ padding:10px 4px 4px; display:flex; flex-direction:column; gap:6px; }
+.history-list{ max-height:300px; overflow-y:auto; -webkit-overflow-scrolling:touch; display:flex; flex-direction:column; gap:6px; }
+.history-entry{ padding:8px 10px; border-radius:8px; background:rgba(255,255,255,.03); border:1px solid rgba(201,161,74,.15); }
+.history-entry .h-time{ font-family:var(--f-deco); font-size:9px; color:var(--ink-ghost); letter-spacing:1px; }
+.history-entry .h-tags{ font-family:var(--f-cn); font-size:12px; color:var(--ink-dim); margin-top:4px; line-height:1.5; }
+.history-entry .h-tags span{ color:var(--gold-3); font-size:11px; margin-right:4px; }
+.history-clear{ align-self:flex-end; padding:6px 14px; border-radius:6px; cursor:pointer;
+  background:transparent; border:1px solid rgba(201,161,74,.25); color:var(--ink-ghost);
+  font-family:var(--f-deco); font-size:9px; letter-spacing:2px; text-transform:uppercase; }
+.history-empty{ text-align:center; font-size:12px; color:var(--ink-ghost); padding:12px; }
+
 .gore-warn-veil{ position:fixed; inset:0; z-index:150; display:flex; align-items:center; justify-content:center;
   background:rgba(10,2,2,.85); backdrop-filter:blur(4px); opacity:0; pointer-events:none; transition:opacity .35s; }
 .gore-warn-veil.show{ opacity:1; pointer-events:auto; }
@@ -323,7 +360,7 @@ body.gore .omi-send{ color:#2a0606; }
             <path class="frameline" d="M10 90 L10 48 Q10 10 48 10 L252 10 Q290 10 290 48 L290 90 Z"/>
             <path class="bulbline" pathLength="672" d="M12 88 L12 48 Q12 12 48 12 L252 12 Q288 12 288 48 L288 88 Z"/>
           </svg>
-          <h1 class="title"><span class="l1">Routa della</span><span class="l2">Fortuna</span></h1>
+          <h1 class="title"><span class="l1">Ruota della</span><span class="l2">Fortuna</span></h1>
         </div>
       </div>
       <div class="help-btn" id="helpBtn" title="help">?</div>
@@ -381,13 +418,28 @@ body.gore .omi-send{ color:#2a0606; }
       </div>
     </section>
 
+    <section class="search-wrap">
+      <input class="search-input" id="searchInput" type="text" placeholder="搜索 Tags · Search tags..." autocomplete="off">
+      <div class="search-results" id="searchResults"></div>
+    </section>
+
+    <section class="history-section">
+      <button class="history-toggle" id="historyToggle"><span class="chev">▸</span> Roll History <span class="cn">· 历史记录</span></button>
+      <div class="history-panel" id="historyPanel">
+        <div class="history-inner">
+          <button class="history-clear" id="historyClear">Clear · 清空</button>
+          <div class="history-list" id="historyList"></div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <div class="help-veil" id="helpVeil">
     <div class="help-card">
-      <h2>Routa della Fortuna</h2>
+      <h2>Ruota della Fortuna</h2>
       <div class="sub">Welcome</div>
-      <dd>这是一个随机的 NSFW tag 老虎机，共 7 个维度，400+ tags，来源于 AO3、哔咔、DLsite 等主流网站。</dd>
+      <dd>这是一个随机的NSFW tag老虎机，共7个维度，400+ tags，来源于AO3、哔咔、DLsite等主流网站，下面是关于这七个维度的介绍：</dd>
       <dl>
         <dt>体位 · Entry</dt>
         <dd>身体的排列方式或者进入哪个入口</dd>
@@ -401,10 +453,10 @@ body.gore .omi-send{ color:#2a0606; }
         <dd>有关身体上的玩法。节奏、力度、什么时候允许高潮、什么时候不允许</dd>
         <dt>精神 · Mind</dt>
         <dd>有关精神上的玩法。羞辱、夸奖、控制、服从</dd>
-        <dt class="gore-warn">GORE</dt>
+        <dt class="gore-warn">GORE · ⚠</dt>
         <dd class="gore-warn">预警：此轮子仅存于虚拟场景中，默认锁定。包含血腥暴力等元素。谨慎选择</dd>
       </dl>
-      <p class="note">每个轮子都可以加减，可以添加自定义 tags，tags 之间可能会有冲突。Enjoy! (^^)</p>
+      <p class="note">每个轮子都可以加减，可以添加自定义tags并保存，可以搜索tags，不同轮子的tags之间可能会有冲突<br>Enjoy！(^^)</p>
       <button class="close-help" id="closeHelp">Got it</button>
       <div class="credit">C&M</div>
     </div>
@@ -599,7 +651,7 @@ body.gore .omi-send{ color:#2a0606; }
       }
       const bank = document.getElementById("bank");
       this.dims.forEach((d) => { const r = new Reel(d); this.reels.push(r); bank.appendChild(r.el); });
-      this.buildMarquee(); this.wireControls(); this.idleMarquee();
+      this.buildMarquee(); this.wireControls(); this.wireSearch(); this.wireHistory(); this.idleMarquee();
     },
     activeReels() { return this.reels.filter(r => r.active && !r.locked); },
     activeCount() { return this.activeReels().length; },
@@ -718,6 +770,82 @@ body.gore .omi-send{ color:#2a0606; }
       });
     },
 
+    wireSearch() {
+      const input = document.getElementById("searchInput");
+      const results = document.getElementById("searchResults");
+      let debounce = null;
+      input.addEventListener("input", () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
+          const q = input.value.trim().toLowerCase();
+          if (!q) { results.classList.remove("open"); results.innerHTML = ""; return; }
+          const matches = [];
+          for (const r of this.reels) {
+            for (const t of r.tags) {
+              if ((t.zh && t.zh.toLowerCase().includes(q)) ||
+                  (t.en && t.en.toLowerCase().includes(q)) ||
+                  (t.ja && t.ja.toLowerCase().includes(q))) {
+                matches.push({ tag: t, dim: r.dim });
+                if (matches.length >= 30) break;
+              }
+            }
+            if (matches.length >= 30) break;
+          }
+          if (!matches.length) {
+            results.innerHTML = '<div class="search-empty">无结果 · No results</div>';
+          } else {
+            results.innerHTML = matches.map(m => {
+              let sub = [m.tag.en, m.tag.ja].filter(Boolean).join(" · ");
+              return '<div class="search-item"><span class="s-tag">' + m.tag.zh + '</span>' +
+                '<span class="s-dim">' + (m.dim.short || m.dim.en) + '</span>' +
+                (sub ? '<span class="s-sub">' + sub + '</span>' : '') + '</div>';
+            }).join("");
+          }
+          results.classList.add("open");
+        }, 180);
+      });
+      input.addEventListener("blur", () => { setTimeout(() => { results.classList.remove("open"); }, 200); });
+      input.addEventListener("focus", () => { if (input.value.trim()) input.dispatchEvent(new Event("input")); });
+    },
+
+    wireHistory() {
+      const STORAGE_KEY = "ruota-history";
+      const MAX = 200;
+      const toggle = document.getElementById("historyToggle");
+      const panel = document.getElementById("historyPanel");
+      const list = document.getElementById("historyList");
+      const clear = document.getElementById("historyClear");
+
+      function load() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
+      function save(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.slice(0, MAX))); }
+
+      this._historySave = function (results) {
+        const arr = load();
+        arr.unshift({ ts: new Date().toISOString(), tags: results.map(r => ({ dim: r.dim.short || r.dim.en, zh: r.result.zh, en: r.result.en || "" })) });
+        save(arr);
+        renderList();
+      };
+
+      function renderList() {
+        const arr = load();
+        if (!arr.length) { list.innerHTML = '<div class="history-empty">暂无记录 · No history</div>'; return; }
+        list.innerHTML = arr.map(e => {
+          const d = new Date(e.ts);
+          const ts = d.toLocaleDateString("zh", { month: "2-digit", day: "2-digit" }) + " " + d.toLocaleTimeString("zh", { hour: "2-digit", minute: "2-digit" });
+          const tags = e.tags.map(t => '<span>' + t.dim + '</span>' + t.zh).join(" · ");
+          return '<div class="history-entry"><div class="h-time">' + ts + '</div><div class="h-tags">' + tags + '</div></div>';
+        }).join("");
+      }
+
+      toggle.addEventListener("click", () => {
+        panel.classList.toggle("open");
+        toggle.querySelector(".chev").textContent = panel.classList.contains("open") ? "▾" : "▸";
+        if (panel.classList.contains("open")) renderList();
+      });
+      clear.addEventListener("click", () => { localStorage.removeItem(STORAGE_KEY); renderList(); });
+      renderList();
+    },
+
     setBusy(v) { this.busy = v; document.body.classList.toggle("busy", v); this.spinBtn.disabled = v; },
     spinAll() {
       if (this.busy) return;
@@ -751,6 +879,7 @@ body.gore .omi-send{ color:#2a0606; }
         list.appendChild(li);
       });
       document.getElementById("resultVeil").classList.add("show");
+      if (this._historySave) this._historySave(live);
     },
     sendToAI() {
       const live = this.activeReels().filter(r => r.result);

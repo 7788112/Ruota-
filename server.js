@@ -84,7 +84,7 @@ app.get("/api/mcp/tools", (_req, res) => {
       {
         name: "ero_slot_spin",
         description:
-          "Spin the Routa della Fortuna slot machine. Returns a random tag per active dimension — tonight's recipe.",
+          "Spin the Ruota della Fortuna slot machine. Returns a random tag per active dimension — tonight's recipe.",
         inputSchema: {
           type: "object",
           properties: {
@@ -116,7 +116,7 @@ app.get("/api/mcp/tools", (_req, res) => {
       {
         name: "ero_slot_dimensions",
         description:
-          "List all available dimensions and their tags for the Routa della Fortuna slot machine.",
+          "List all available dimensions and their tags for the Ruota della Fortuna slot machine.",
         inputSchema: { type: "object", properties: {} },
       },
     ],

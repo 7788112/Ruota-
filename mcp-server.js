@@ -12,7 +12,7 @@ const TOOLS = [
   {
     name: "ero_slot_spin",
     description:
-      "Spin the Routa della Fortuna slot machine. Returns a random NSFW tag per active dimension — tonight's recipe. Defaults to all 6 non-gore dimensions if none specified.",
+      "Spin the Ruota della Fortuna slot machine. Returns a random NSFW tag per active dimension — tonight's recipe. Defaults to all 6 non-gore dimensions if none specified.",
     inputSchema: {
       type: "object",
       properties: {

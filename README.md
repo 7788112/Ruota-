@@ -1,4 +1,4 @@
-# Routa della Fortuna
+# Ruota della Fortuna
 
 Pick your wheels. Pull the lever. No refunds.
 
