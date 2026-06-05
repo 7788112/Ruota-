@@ -297,11 +297,15 @@ body.gore .omi-again{ color:#ffd8d4; }
   background:var(--bg-0); border:1px solid var(--gold-line); border-top:none; border-radius:0 0 10px 10px;
   display:none; -webkit-overflow-scrolling:touch; }
 .search-results.open{ display:block; }
-.search-item{ padding:8px 14px; border-bottom:1px solid rgba(201,161,74,.15); cursor:default; }
+.search-item{ padding:8px 14px; border-bottom:1px solid rgba(201,161,74,.15); cursor:default; display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
 .search-item:last-child{ border-bottom:none; }
+.search-item .s-info{ flex:1; min-width:0; }
 .search-item .s-tag{ font-family:var(--f-cn); font-size:13px; font-weight:600; color:var(--ink); }
 .search-item .s-dim{ font-family:var(--f-deco); font-size:9px; letter-spacing:1px; color:var(--ink-ghost); margin-left:8px; text-transform:uppercase; }
 .search-item .s-sub{ display:block; font-family:var(--f-deco); font-size:10px; color:var(--ink-dim); margin-top:2px; }
+.search-del{ flex:0 0 auto; width:24px; height:24px; border-radius:50%; border:1px solid rgba(201,161,74,.25); background:transparent;
+  color:var(--ink-ghost); font-size:14px; line-height:1; cursor:pointer; display:grid; place-items:center; margin-top:2px; }
+.search-del:hover{ border-color:var(--accent); color:var(--accent); }
 .search-empty{ padding:12px 14px; font-size:12px; color:var(--ink-ghost); text-align:center; }
 
 /* ===================== history ===================== */
@@ -766,39 +770,66 @@ body.gore .omi-again{ color:#ffd8d4; }
     wireSearch() {
       const input = document.getElementById("searchInput");
       const results = document.getElementById("searchResults");
+      const self = this;
       let debounce = null;
-      input.addEventListener("input", () => {
-        clearTimeout(debounce);
-        debounce = setTimeout(() => {
-          const q = input.value.trim().toLowerCase();
-          if (!q) { results.classList.remove("open"); results.innerHTML = ""; return; }
-          const matches = [];
-          for (const r of this.reels) {
-            for (const t of r.tags) {
-              if ((t.zh && t.zh.toLowerCase().includes(q)) ||
-                  (t.en && t.en.toLowerCase().includes(q)) ||
-                  (t.ja && t.ja.toLowerCase().includes(q))) {
-                matches.push({ tag: t, dim: r.dim });
-                if (matches.length >= 30) break;
-              }
+
+      function doSearch() {
+        const q = input.value.trim().toLowerCase();
+        if (!q) { results.classList.remove("open"); results.innerHTML = ""; return; }
+        const matches = [];
+        for (const r of self.reels) {
+          for (let i = 0; i < r.tags.length; i++) {
+            const t = r.tags[i];
+            if ((t.zh && t.zh.toLowerCase().includes(q)) ||
+                (t.en && t.en.toLowerCase().includes(q)) ||
+                (t.ja && t.ja.toLowerCase().includes(q))) {
+              matches.push({ tag: t, dim: r.dim, reel: r, idx: i });
+              if (matches.length >= 30) break;
             }
-            if (matches.length >= 30) break;
           }
-          if (!matches.length) {
-            results.innerHTML = '<div class="search-empty">无结果 · No results</div>';
-          } else {
-            results.innerHTML = matches.map(m => {
-              let sub = [m.tag.en, m.tag.ja].filter(Boolean).join(" · ");
-              return '<div class="search-item"><span class="s-tag">' + m.tag.zh + '</span>' +
-                '<span class="s-dim">' + (m.dim.short || m.dim.en) + '</span>' +
-                (sub ? '<span class="s-sub">' + sub + '</span>' : '') + '</div>';
-            }).join("");
-          }
-          results.classList.add("open");
-        }, 180);
-      });
+          if (matches.length >= 30) break;
+        }
+        if (!matches.length) {
+          results.innerHTML = '<div class="search-empty">无结果 · No results</div>';
+        } else {
+          results.innerHTML = matches.map((m, mi) => {
+            let sub = [m.tag.en, m.tag.ja].filter(Boolean).join(" · ");
+            return '<div class="search-item"><div class="s-info"><span class="s-tag">' + m.tag.zh + '</span>' +
+              '<span class="s-dim">' + (m.dim.short || m.dim.en) + '</span>' +
+              (sub ? '<span class="s-sub">' + sub + '</span>' : '') + '</div>' +
+              '<button class="search-del" data-mi="' + mi + '" title="删除">×</button></div>';
+          }).join("");
+          results.querySelectorAll(".search-del").forEach(btn => {
+            btn.addEventListener("mousedown", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const m = matches[parseInt(btn.dataset.mi)];
+              if (!m) return;
+              self.deleteTag(m.reel, m.tag);
+              doSearch();
+            });
+          });
+        }
+        results.classList.add("open");
+      }
+
+      input.addEventListener("input", () => { clearTimeout(debounce); debounce = setTimeout(doSearch, 180); });
       input.addEventListener("blur", () => { setTimeout(() => { results.classList.remove("open"); }, 200); });
-      input.addEventListener("focus", () => { if (input.value.trim()) input.dispatchEvent(new Event("input")); });
+      input.addEventListener("focus", () => { if (input.value.trim()) doSearch(); });
+    },
+
+    deleteTag(reel, tag) {
+      const idx = reel.tags.indexOf(tag);
+      if (idx < 0) return;
+      reel.tags.splice(idx, 1);
+      if (!reel.tags.length) { this.flashHint("至少保留一个 tag"); reel.tags.splice(idx, 0, tag); return; }
+      reel.copies = calcCopies(reel.tags.length);
+      reel.baseCopy = Math.floor(reel.copies / 2);
+      reel.d = reel.baseCopy * reel.tags.length * ROW_H;
+      reel.result = null;
+      reel.renderStrip(); reel.render();
+      buzz(8); Audio.tick();
+      this.flashHint("已删除 " + tag.zh);
     },
 
     wireHistory() {
